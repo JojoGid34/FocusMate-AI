@@ -449,12 +449,15 @@
     alarmInterval = setInterval(() => { playNoiseAlarm(); }, 3000);
     addLog("🚨 ALARM LAPTOP: Ruangan tidak kondusif!", "err");
   }
-
+  
   function stopAlarm() {
     if (!alarmActive) return;
     alarmActive = false;
     $("alarmBanner").classList.remove("show");
-    if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
+    if (alarmInterval) { 
+      clearInterval(alarmInterval); 
+      alarmInterval = null; 
+    }
     addLog("✅ Alarm laptop dimatikan", "ok");
   }
 
@@ -867,10 +870,9 @@
 
   $("testAlarmBtn").addEventListener("click", () => {
     addLog("🚨 TEST ALARM LAPTOP!", "warn");
-    playNoiseAlarm();
-    setInterval(() => playNoiseAlarm(), 3000);
+    startAlarm();
   });
-
+  
   $("stopAlarmBtn").addEventListener("click", () => {
     stopAlarm();
     addLog("⏹️ Alarm laptop di-stop manual", "ok");
