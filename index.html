@@ -59,6 +59,46 @@
       50% { transform: scale(1.02); opacity: 0.85; }
     }
 
+    .mic-panel {
+      background: rgba(111,140,255,0.08);
+      border: 1px solid rgba(111,140,255,0.3);
+      border-radius: 16px; padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .mic-panel .mic-info {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .mic-panel .mic-icon {
+      font-size: 32px;
+      animation: mic-pulse 2s infinite;
+    }
+    .mic-panel .mic-icon.off {
+      animation: none; opacity: 0.4;
+    }
+    @keyframes mic-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    .mic-panel .mic-level {
+      font-size: 24px; font-weight: 800;
+      color: #6f8cff;
+    }
+    .mic-panel .mic-label {
+      font-size: 12px; color: #8899bb;
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .mic-bar {
+      width: 200px; height: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px; overflow: hidden;
+    }
+    .mic-bar .fill {
+      height: 100%; background: linear-gradient(90deg, #6f8cff, #ae7cff);
+      border-radius: 10px; transition: width 0.1s;
+    }
+
     .main-grid {
       display: grid; grid-template-columns: 1fr 1fr 1fr;
       gap: 16px; margin-bottom: 20px;
@@ -212,6 +252,21 @@
     </div>
   </div>
 
+  <!-- MIC PANEL -->
+  <div class="mic-panel">
+    <div class="mic-info">
+      <div class="mic-icon off" id="micIcon">🎤</div>
+      <div>
+        <div class="mic-label">Mic Laptop</div>
+        <div class="mic-level" id="micLevelText">OFF</div>
+      </div>
+    </div>
+    <div class="mic-bar">
+      <div class="fill" id="micBar" style="width:0%;"></div>
+    </div>
+    <button class="btn btn-primary" id="micBtn" style="flex:0; min-width:180px;">🎤 Aktifkan Mic Laptop</button>
+  </div>
+
   <div class="alarm-banner" id="alarmBanner">
     🚨 ALARM! RUANGAN TIDAK KONDUSIF - KEBISINGAN TINGGI 🚨
   </div>
@@ -288,7 +343,7 @@
   <div class="sensor-grid-3" style="margin-bottom: 12px;">
     <div class="sensor-card">
       <span class="indicator" id="indSound"></span>
-      <div class="title">🔊 Suara</div>
+      <div class="title">🔊 KY-037</div>
       <div class="value" id="soundValue">--</div>
       <div class="sub" id="soundSub">ADC: --</div>
     </div>
@@ -333,9 +388,8 @@
   </div>
 
   <div class="controls">
-    <button class="btn btn-warning" id="muteBtn">🔕 Mute Buzzer ESP32</button>
-    <button class="btn btn-success" id="unmuteBtn">🔔 Unmute Buzzer ESP32</button>
-    <button class="btn btn-primary" id="recalibrateBtn">🎚️ Rekalibrasi Suara</button>
+    <button class="btn btn-warning" id="muteBtn">🔕 Mute Buzzer</button>
+    <button class="btn btn-success" id="unmuteBtn">🔔 Unmute Buzzer</button>
   </div>
 
   <div class="controls">
@@ -388,11 +442,21 @@
   let stableFrames = 0;
   let lastFaceSentTime = 0;
 
+  // Mic laptop state
+  let micActive = false;
+  let audioContext = null;
+  let analyser = null;
+  let micStream = null;
+  let micLevel = 0;
+  let lastMicSentTime = 0;
+  const MIC_SEND_INTERVAL = 200;  // Kirim ke ESP32 setiap 200ms
+
   let alarmActive = false;
   let alarmInterval = null;
 
   let sensorData = {
-    soundADC: 0, soundRaw: 0, soundBaseline: 0, soundLevel: 0, soundStatus: "UNKNOWN", soundScore: 0,
+    soundADC: 0, soundRaw: 0, soundLevel: 0, soundStatus: "UNKNOWN", soundScore: 0,
+    micLevel: 0, micActive: false,
     temp: 0, tempStatus: "UNKNOWN", tempScore: 0,
     hum: 0,
     light: 0, lightStatus: "UNKNOWN", lightScore: 0,
@@ -449,16 +513,96 @@
     alarmInterval = setInterval(() => { playNoiseAlarm(); }, 3000);
     addLog("🚨 ALARM LAPTOP: Ruangan tidak kondusif!", "err");
   }
-  
+
   function stopAlarm() {
     if (!alarmActive) return;
     alarmActive = false;
     $("alarmBanner").classList.remove("show");
-    if (alarmInterval) { 
-      clearInterval(alarmInterval); 
-      alarmInterval = null; 
-    }
+    if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
     addLog("✅ Alarm laptop dimatikan", "ok");
+  }
+
+  // =========================================================
+  // MIC LAPTOP
+  // =========================================================
+  async function startMic() {
+    if (micActive) return;
+    try {
+      $("micBtn").disabled = true;
+      $("micBtn").textContent = "Meminta akses mic...";
+
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaStreamSource(micStream);
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.5;
+      
+      source.connect(analyser);
+
+      micActive = true;
+      $("micBtn").textContent = "✅ Mic Aktif";
+      $("micIcon").classList.remove("off");
+      addLog("🎤 Mic laptop aktif!", "ok");
+
+      detectSoundLevel();
+    } catch (error) {
+      console.error(error);
+      $("micBtn").disabled = false;
+      $("micBtn").textContent = "🎤 Aktifkan Mic Laptop";
+      addLog("Gagal akses mic: " + error.message, "err");
+    }
+  }
+
+  function detectSoundLevel() {
+    if (!micActive) return;
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(dataArray);
+
+    // Hitung rata-rata volume
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+      sum += dataArray[i];
+    }
+    const avg = sum / dataArray.length;
+
+    // Konversi ke 0-100
+    // avg: 0 = sunyi, 255 = sangat keras
+    micLevel = Math.round((avg / 255) * 100);
+    micLevel = Math.max(0, Math.min(100, micLevel));
+
+    sensorData.micLevel = micLevel;
+
+    // Update UI
+    $("micLevelText").textContent = micLevel + "%";
+    $("micBar").style.width = micLevel + "%";
+    
+    // Warna bar
+    if (micLevel > 70) $("micBar").style.background = "#ff5f73";
+    else if (micLevel > 40) $("micBar").style.background = "#ffd166";
+    else $("micBar").style.background = "linear-gradient(90deg, #6f8cff, #ae7cff)";
+
+    // Kirim ke ESP32 (throttled)
+    const now = Date.now();
+    if (serialReady && now - lastMicSentTime > MIC_SEND_INTERVAL) {
+      sendToESP32("MIC:" + micLevel + ":ON");
+      lastMicSentTime = now;
+    }
+
+    // Cek alarm dari mic laptop juga
+    checkMicAlarm();
+
+    requestAnimationFrame(detectSoundLevel);
+  }
+
+  function checkMicAlarm() {
+    // Alarm dari mic laptop jika level > 70%
+    if (micLevel > 70 && !alarmActive) {
+      startAlarm();
+      addLog("🚨 Mic laptop: suara terlalu keras!", "warn");
+    }
   }
 
   // =========================================================
@@ -495,13 +639,14 @@
       `conic-gradient(${gaugeColor} 0deg, ${gaugeColor} ${degrees}deg, rgba(255,255,255,0.08) ${degrees}deg)`;
     $("gaugeScore").style.color = gaugeColor;
 
-    updateBar("sound", sensorData.soundScore, `${sensorData.soundStatus} (ADC: ${sensorData.soundADC})`);
+    updateBar("sound", sensorData.soundScore, 
+      `${sensorData.soundStatus} (KY: ${sensorData.soundADC} | Mic: ${sensorData.micLevel}%)`);
     updateBar("temp", sensorData.tempScore, `${sensorData.temp.toFixed(1)}°C - ${sensorData.tempStatus}`);
     updateBar("light", sensorData.lightScore, `${sensorData.light}% - ${sensorData.lightStatus}`);
     updateBar("face", sensorData.faceScore, `${sensorData.face.replace(/_/g, " ")}`);
 
     $("soundValue").textContent = sensorData.soundLevel + "%";
-    $("soundSub").textContent = `ADC: ${sensorData.soundADC} | BL: ${sensorData.soundBaseline}`;
+    $("soundSub").textContent = `ADC: ${sensorData.soundADC}`;
     setIndicator("indSound", sensorData.soundScore);
 
     $("tempValue").textContent = sensorData.temp.toFixed(1) + "°C";
@@ -527,7 +672,11 @@
   }
 
   function checkNoiseAlarm() {
-    const shouldAlarm = (sensorData.soundScore < ALARM_SOUND_THRESHOLD);
+    // ★ Alarm aktif jika salah satu mendeteksi:
+    // - KY-037: soundScore < 30
+    // - Mic laptop: micLevel > 70
+    const shouldAlarm = (sensorData.soundScore < ALARM_SOUND_THRESHOLD) || (micLevel > 70);
+    
     if (shouldAlarm && !alarmActive) {
       startAlarm();
       setStatus("TIDAK KONDUSIF", "red");
@@ -807,10 +956,11 @@
         const val = part.substring(idx + 1).trim();
         if (key === "sound_adc") data.soundADC = parseInt(val);
         else if (key === "sound_raw") data.soundRaw = parseInt(val);
-        else if (key === "sound_baseline") data.soundBaseline = parseInt(val);
         else if (key === "sound_level") data.soundLevel = parseInt(val);
         else if (key === "sound_status") data.soundStatus = val;
         else if (key === "sound_score") data.soundScore = parseInt(val);
+        else if (key === "mic_level") data.micLevel = parseInt(val);
+        else if (key === "mic_active") data.micActive = val === "1";
         else if (key === "temp") data.temp = parseFloat(val);
         else if (key === "temp_status") data.tempStatus = val;
         else if (key === "temp_score") data.tempScore = parseInt(val);
@@ -830,7 +980,8 @@
         updateUI();
       }
     } else if (line.startsWith("[BUTTON]") || line.startsWith("[BUZZER]") ||
-               line.startsWith("[FACE]") || line.startsWith("[WEB]")) {
+               line.startsWith("[FACE]") || line.startsWith("[WEB]") ||
+               line.startsWith("[MIC]")) {
       addLog("ESP32: " + line, "info");
     }
   }
@@ -852,6 +1003,7 @@
   // =========================================================
   $("cameraBtn").addEventListener("click", startCamera);
   $("connectBtn").addEventListener("click", connectESP32);
+  $("micBtn").addEventListener("click", startMic);
 
   $("muteBtn").addEventListener("click", async () => {
     await sendToESP32("BUZZER_MUTE");
@@ -863,16 +1015,11 @@
     addLog("🔔 Buzzer unmute dikirim", "ok");
   });
 
-  $("recalibrateBtn").addEventListener("click", async () => {
-    await sendToESP32("RECALIBRATE");
-    addLog("🎚️ Rekalibrasi baseline dikirim (3 detik)", "warn");
-  });
-
   $("testAlarmBtn").addEventListener("click", () => {
     addLog("🚨 TEST ALARM LAPTOP!", "warn");
     startAlarm();
   });
-  
+
   $("stopAlarmBtn").addEventListener("click", () => {
     stopAlarm();
     addLog("⏹️ Alarm laptop di-stop manual", "ok");
@@ -886,6 +1033,7 @@
   addLog("🎯 FocusMate AI siap.", "info");
   addLog("Model Pose: " + URL_MODEL_POSE.substring(0, 50) + "...", "info");
   addLog("Kelas: FOKUS, MENGANTUK, DISTRAKSI, TIDAK_ADA_ORANG", "info");
+  addLog("Audio: KY-037 + Mic Laptop (fusion)", "info");
   setStatus("Menunggu koneksi", "gray");
 </script>
 </body>
