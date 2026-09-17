@@ -5,255 +5,690 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FocusMate AI - Smart Work Monitor</title>
 
+  <!-- TensorFlow.js -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
 
   <style>
-    * { box-sizing: border-box; margin: 0; }
+    /* ===== FONT SYSTEM (LOKAL) ===== */
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 400;
+      src: local('Inter Regular'), local('Inter-Regular'), local('Segoe UI'), local('Arial');
+    }
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 600;
+      src: local('Inter SemiBold'), local('Inter-SemiBold'), local('Segoe UI Semibold'), local('Arial Bold');
+    }
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 800;
+      src: local('Inter ExtraBold'), local('Inter-ExtraBold'), local('Segoe UI Black'), local('Arial Black');
+    }
+
+    /* ===== THEME COKELAT ===== */
+    :root {
+      --bg-primary: #1a0f0a;
+      --bg-secondary: #2d1810;
+      --bg-tertiary: #3d2418;
+      --brown-1: #5c3317;
+      --brown-2: #8b5a2b;
+      --brown-3: #a0522d;
+      --brown-light: #d4a574;
+      --brown-cream: #f5e6d3;
+      --accent-green: #7cb342;
+      --accent-yellow: #fbc02d;
+      --accent-red: #e53935;
+      --text-primary: #f5e6d3;
+      --text-secondary: #c9a88a;
+      --text-muted: #8b6f5c;
+      --border: rgba(212, 165, 116, 0.15);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #0a0e1a; color: #f0f4ff;
-      min-height: 100vh; display: flex;
-      justify-content: center; padding: 20px;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: 
+        radial-gradient(circle at 20% 0%, rgba(139, 90, 43, 0.15), transparent 40%),
+        radial-gradient(circle at 80% 100%, rgba(92, 51, 23, 0.2), transparent 40%),
+        linear-gradient(180deg, var(--bg-primary), #0f0805);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
     }
+
     .app {
-      max-width: 1400px; width: 100%;
-      background: linear-gradient(145deg, #111b2e, #0d1628);
-      border-radius: 28px; padding: 28px 32px 34px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-      border: 1px solid rgba(255,255,255,0.06);
+      max-width: 1400px;
+      width: 100%;
+      background: linear-gradient(145deg, var(--bg-secondary), var(--bg-primary));
+      border-radius: 24px;
+      padding: 28px 32px 34px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
     }
+
+    /* ===== HEADER ===== */
     .header {
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 12px; margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
     }
     .header h1 {
       font-size: 26px;
-      background: linear-gradient(135deg, #6f8cff, #ae7cff);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      display: flex; align-items: center; gap: 12px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--brown-light), var(--brown-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.02em;
     }
-    .header h1 small { font-size: 14px; -webkit-text-fill-color: #8899bb; font-weight: 400; }
+    .header h1 small {
+      font-size: 13px;
+      -webkit-text-fill-color: var(--text-secondary);
+      font-weight: 400;
+      letter-spacing: 0;
+    }
     .status-badge {
-      padding: 8px 18px; border-radius: 40px; font-size: 13px; font-weight: 700;
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
-      display: flex; align-items: center; gap: 8px;
+      padding: 8px 18px;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(212, 165, 116, 0.08);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .dot.green { background: #52e69d; box-shadow: 0 0 12px #52e69d66; }
-    .dot.yellow { background: #ffd166; box-shadow: 0 0 12px #ffd16666; }
-    .dot.red { background: #ff5f73; box-shadow: 0 0 12px #ff5f7366; animation: blink 0.6s infinite; }
-    .dot.gray { background: #4a5a72; }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+    .dot.green { background: var(--accent-green); box-shadow: 0 0 12px var(--accent-green); }
+    .dot.yellow { background: var(--accent-yellow); box-shadow: 0 0 12px var(--accent-yellow); }
+    .dot.red { background: var(--accent-red); box-shadow: 0 0 12px var(--accent-red); animation: blink 0.6s infinite; }
+    .dot.gray { background: var(--text-muted); }
     @keyframes blink { 0%,100% {opacity:1;} 50% {opacity:0.3;} }
 
+    /* ===== ALARM BANNER ===== */
     .alarm-banner {
-      display: none; padding: 16px 24px; border-radius: 16px;
-      text-align: center; font-size: 18px; font-weight: 800;
-      margin-bottom: 20px; border: 2px solid #ff5f73;
-      background: rgba(255,95,115,0.15); color: #ff5f73;
+      display: none;
+      padding: 18px 24px;
+      border-radius: 16px;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      border: 2px solid var(--accent-red);
+      background: linear-gradient(135deg, rgba(229,57,53,0.15), rgba(229,57,53,0.08));
+      color: var(--accent-red);
       animation: alarm-pulse 0.8s infinite;
+      letter-spacing: 0.02em;
     }
     .alarm-banner.show { display: block; }
     @keyframes alarm-pulse {
       0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.02); opacity: 0.85; }
+      50% { transform: scale(1.01); opacity: 0.85; }
     }
 
+    /* ===== MIC PANEL ===== */
     .mic-panel {
-      background: rgba(111,140,255,0.08);
-      border: 1px solid rgba(111,140,255,0.3);
-      border-radius: 16px; padding: 16px 20px;
+      background: linear-gradient(135deg, rgba(139,90,43,0.2), rgba(92,51,23,0.15));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px 20px;
       margin-bottom: 20px;
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      transition: all 0.3s;
     }
-    .mic-panel .mic-info {
-      display: flex; align-items: center; gap: 14px;
+    .mic-panel.active {
+      border-color: rgba(124,179,66,0.4);
+      box-shadow: 0 0 30px rgba(124,179,66,0.08);
     }
+    .mic-panel .mic-info { display: flex; align-items: center; gap: 14px; }
     .mic-panel .mic-icon {
       font-size: 32px;
       animation: mic-pulse 2s infinite;
+      transition: all 0.3s;
     }
-    .mic-panel .mic-icon.off {
-      animation: none; opacity: 0.4;
-    }
+    .mic-panel .mic-icon.off { animation: none; opacity: 0.35; }
     @keyframes mic-pulse {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.15); }
+      50% { transform: scale(1.12); }
     }
     .mic-panel .mic-level {
-      font-size: 24px; font-weight: 800;
-      color: #6f8cff;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--brown-light);
+      font-variant-numeric: tabular-nums;
     }
     .mic-panel .mic-label {
-      font-size: 12px; color: #8899bb;
-      text-transform: uppercase; letter-spacing: 0.08em;
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
     }
     .mic-bar {
-      width: 200px; height: 10px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 10px; overflow: hidden;
+      flex: 1;
+      min-width: 200px;
+      height: 12px;
+      background: rgba(212,165,116,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
     }
     .mic-bar .fill {
-      height: 100%; background: linear-gradient(90deg, #6f8cff, #ae7cff);
-      border-radius: 10px; transition: width 0.1s;
+      height: 100%;
+      background: linear-gradient(90deg, var(--brown-2), var(--brown-light));
+      border-radius: 10px;
+      transition: width 0.1s, background 0.3s;
+      box-shadow: 0 0 12px rgba(212,165,116,0.4);
     }
 
+    /* ===== MAIN GRID ===== */
     .main-grid {
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px; margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
     }
     @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 700px) { .main-grid { grid-template-columns: 1fr; } }
 
     .panel {
-      background: rgba(255,255,255,0.03); border-radius: 20px;
-      padding: 18px; border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(61,36,24,0.5), rgba(45,24,16,0.5));
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212,165,116,0.3), transparent);
     }
     .panel .label {
-      font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
-      color: #7a8aa5; margin-bottom: 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .focus-gauge { display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    /* ===== GAUGE ===== */
+    .focus-gauge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
     .gauge-circle {
-      position: relative; width: 200px; height: 200px;
+      position: relative;
+      width: 200px;
+      height: 200px;
       border-radius: 50%;
-      background: conic-gradient(#52e69d 0deg, #52e69d 0deg, rgba(255,255,255,0.08) 0deg);
-      display: grid; place-items: center; transition: background 0.5s;
+      background: conic-gradient(var(--accent-green) 0deg, var(--accent-green) 0deg, rgba(212,165,116,0.08) 0deg);
+      display: grid;
+      place-items: center;
+      transition: background 0.5s;
+      box-shadow: 0 0 40px rgba(212,165,116,0.1);
     }
     .gauge-inner {
-      width: 160px; height: 160px; border-radius: 50%;
-      background: #0d1628;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--bg-secondary), var(--bg-primary));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
     }
-    .gauge-score { font-size: 64px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
-    .gauge-label { font-size: 11px; color: #8899bb; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
-    .gauge-status { font-size: 18px; font-weight: 700; margin-top: 16px; letter-spacing: 0.05em; }
+    .gauge-score {
+      font-size: 64px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      transition: color 0.5s;
+      font-variant-numeric: tabular-nums;
+    }
+    .gauge-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+    .gauge-status {
+      font-size: 17px;
+      font-weight: 800;
+      margin-top: 18px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
 
+    /* ===== BREAKDOWN ===== */
     .breakdown-list { display: flex; flex-direction: column; gap: 12px; }
     .breakdown-item {
-      background: rgba(255,255,255,0.03);
-      border-radius: 12px; padding: 12px 14px;
-      border: 1px solid rgba(255,255,255,0.05);
+      background: rgba(212,165,116,0.04);
+      border-radius: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
     }
-    .breakdown-item .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .breakdown-item .title { font-size: 12px; color: #b0c0d8; font-weight: 600; }
-    .breakdown-item .score { font-size: 16px; font-weight: 800; }
-    .breakdown-item .bar { width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; }
-    .breakdown-item .bar .fill { height: 100%; border-radius: 10px; transition: width 0.5s, background 0.5s; }
+    .breakdown-item:hover { border-color: rgba(212,165,116,0.3); }
+    .breakdown-item .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .breakdown-item .title {
+      font-size: 12px;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .breakdown-item .score {
+      font-size: 16px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .breakdown-item .bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(212,165,116,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .breakdown-item .bar .fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.5s, background 0.5s;
+    }
 
+    /* ===== KAMERA ===== */
     #webcam-container {
-      aspect-ratio: 1; background: #0a111f;
-      border-radius: 14px; overflow: hidden;
-      display: grid; place-items: center;
-      border: 1px solid rgba(255,255,255,0.06);
-      margin-bottom: 10px;
+      aspect-ratio: 1;
+      background: var(--bg-primary);
+      border-radius: 14px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+      position: relative;
     }
     #webcam-container canvas { width: 100%; height: 100%; object-fit: cover; }
-    .placeholder { color: #5a6a82; font-size: 13px; text-align: center; padding: 20px; }
+    .placeholder { color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px; }
 
     .face-detection {
-      background: rgba(255,255,255,0.04); border-radius: 10px;
-      padding: 10px 14px; text-align: center; margin-bottom: 10px;
+      background: rgba(212,165,116,0.04);
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-align: center;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
     }
     .face-detection .label-face {
-      font-size: 10px; text-transform: uppercase;
-      letter-spacing: 0.08em; color: #7a8aa5;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      font-weight: 600;
     }
-    .face-detection .value-face { font-size: 20px; font-weight: 800; margin-top: 2px; }
+    .face-detection .value-face {
+      font-size: 20px;
+      font-weight: 800;
+      margin-top: 2px;
+      letter-spacing: 0.02em;
+    }
 
-    .confidence-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .conf-item { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 6px 10px; font-size: 11px; }
-    .conf-item .top-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-    .conf-item .bar { width: 100%; height: 4px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; }
-    .conf-item .bar .fill { height: 100%; border-radius: 10px; transition: width 0.15s; }
+    .confidence-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .conf-item {
+      background: rgba(212,165,116,0.04);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 11px;
+      border: 1px solid rgba(212,165,116,0.06);
+      transition: all 0.2s;
+    }
+    .conf-item .top-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .conf-item .bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(212,165,116,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .conf-item .bar .fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.15s;
+    }
 
-    .sensor-section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #7a8aa5; margin-bottom: 10px; }
+    /* ===== SENSOR CARDS ===== */
+    .sensor-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
     .sensor-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .sensor-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
     .sensor-card {
-      background: rgba(255,255,255,0.03); border-radius: 14px; padding: 14px 16px;
-      border: 1px solid rgba(255,255,255,0.06);
-      transition: all 0.3s; position: relative;
+      background: linear-gradient(180deg, rgba(61,36,24,0.4), rgba(45,24,16,0.4));
+      border-radius: 14px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      transition: all 0.3s;
+      position: relative;
     }
-    .sensor-card .title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #7a8aa5; margin-bottom: 4px; }
-    .sensor-card .value { font-size: 22px; font-weight: 800; transition: color 0.3s; }
-    .sensor-card .sub { font-size: 10px; color: #8899bb; margin-top: 2px; }
-    .sensor-card .indicator { position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%; background: #2a3550; }
-    .sensor-card .indicator.on { background: #52e69d; box-shadow: 0 0 10px #52e69d; }
-    .sensor-card .indicator.warn { background: #ffd166; box-shadow: 0 0 10px #ffd166; }
-    .sensor-card .indicator.danger { background: #ff5f73; box-shadow: 0 0 10px #ff5f73; animation: blink 0.5s infinite; }
+    .sensor-card .title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .sensor-card .value {
+      font-size: 22px;
+      font-weight: 800;
+      transition: color 0.3s;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+    .sensor-card .sub {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .sensor-card .indicator {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      transition: all 0.3s;
+    }
+    .sensor-card .indicator.on {
+      background: var(--accent-green);
+      box-shadow: 0 0 10px var(--accent-green);
+    }
+    .sensor-card .indicator.warn {
+      background: var(--accent-yellow);
+      box-shadow: 0 0 10px var(--accent-yellow);
+    }
+    .sensor-card .indicator.danger {
+      background: var(--accent-red);
+      box-shadow: 0 0 10px var(--accent-red);
+      animation: blink 0.5s infinite;
+    }
 
+    /* ===== STATUS BOX ===== */
     .status-box {
-      padding: 16px 20px; border-radius: 16px; text-align: center;
-      border: 2px solid transparent; transition: all 0.3s; margin-bottom: 14px;
+      padding: 20px 24px;
+      border-radius: 16px;
+      text-align: center;
+      border: 2px solid transparent;
+      transition: all 0.3s;
+      margin-bottom: 16px;
+      background: rgba(212,165,116,0.04);
     }
-    .status-box .title-status { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #7a8aa5; margin-bottom: 6px; }
-    .status-box .main-status { font-size: 22px; font-weight: 800; letter-spacing: 0.03em; }
-    .status-box .desc-status { font-size: 12px; color: #b0c0d8; margin-top: 4px; }
-    .status-box.normal { background: rgba(82,230,157,0.08); border-color: rgba(82,230,157,0.4); }
-    .status-box.normal .main-status { color: #52e69d; }
-    .status-box.pantau { background: rgba(255,209,102,0.08); border-color: rgba(255,209,102,0.4); }
-    .status-box.pantau .main-status { color: #ffd166; }
-    .status-box.buruk { background: rgba(255,95,115,0.1); border-color: rgba(255,95,115,0.4); animation: pulse-danger 1.5s infinite; }
-    .status-box.buruk .main-status { color: #ff5f73; }
-    @keyframes pulse-danger { 0%,100% { opacity: 1; } 50% { opacity: 0.85; } }
+    .status-box .title-status {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .status-box .main-status {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+    .status-box .desc-status {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+    .status-box.normal {
+      background: linear-gradient(135deg, rgba(124,179,66,0.1), rgba(124,179,66,0.05));
+      border-color: rgba(124,179,66,0.4);
+    }
+    .status-box.normal .main-status { color: var(--accent-green); }
+    .status-box.pantau {
+      background: linear-gradient(135deg, rgba(251,192,45,0.1), rgba(251,192,45,0.05));
+      border-color: rgba(251,192,45,0.4);
+    }
+    .status-box.pantau .main-status { color: var(--accent-yellow); }
+    .status-box.buruk {
+      background: linear-gradient(135deg, rgba(229,57,53,0.12), rgba(229,57,53,0.06));
+      border-color: rgba(229,57,53,0.5);
+      animation: pulse-danger 1.5s infinite;
+    }
+    .status-box.buruk .main-status { color: var(--accent-red); }
+    @keyframes pulse-danger {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
 
-    .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    /* ===== BUTTONS ===== */
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
     .btn {
-      padding: 12px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.05); color: #f0f4ff; font-weight: 600;
-      cursor: pointer; transition: 0.2s; font-size: 13px; flex: 1; min-width: 130px;
+      padding: 13px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(212,165,116,0.06);
+      color: var(--text-primary);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+      flex: 1;
+      min-width: 130px;
+      font-family: inherit;
+      letter-spacing: 0.02em;
     }
-    .btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+    .btn:hover:not(:disabled) {
+      background: rgba(212,165,116,0.12);
+      transform: translateY(-1px);
+      border-color: rgba(212,165,116,0.3);
+    }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-primary { background: linear-gradient(135deg, #6f8cff, #ae7cff); border-color: transparent; color: white; }
-    .btn-success { background: linear-gradient(135deg, #52e69d, #2ecc71); border-color: transparent; color: #0a1a1a; }
-    .btn-danger { background: linear-gradient(135deg, #ff5f73, #e03a4a); border-color: transparent; color: white; }
-    .btn-warning { background: linear-gradient(135deg, #ffd166, #f0a500); border-color: transparent; color: #0a1a1a; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brown-2), var(--brown-1));
+      border-color: transparent;
+      color: var(--brown-cream);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, var(--brown-3), var(--brown-2));
+    }
+    .btn-success {
+      background: linear-gradient(135deg, #689f38, #558b2f);
+      border-color: transparent;
+      color: white;
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #e53935, #c62828);
+      border-color: transparent;
+      color: white;
+    }
+    .btn-warning {
+      background: linear-gradient(135deg, #fbc02d, #f9a825);
+      border-color: transparent;
+      color: #1a0f0a;
+    }
 
+    /* ===== TIPS ===== */
     .tips-list { display: flex; flex-direction: column; gap: 8px; }
     .tip-item {
-      background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px 14px;
-      font-size: 12px; color: #b0c0d8; border-left: 3px solid #6f8cff;
-      display: flex; align-items: flex-start; gap: 8px;
+      background: rgba(212,165,116,0.04);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      border-left: 3px solid var(--brown-light);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      transition: all 0.2s;
+      line-height: 1.5;
     }
-    .tip-item.success { border-left-color: #52e69d; }
-    .tip-item.warning { border-left-color: #ffd166; }
-    .tip-item.danger { border-left-color: #ff5f73; }
+    .tip-item.success { border-left-color: var(--accent-green); }
+    .tip-item.warning { border-left-color: var(--accent-yellow); }
+    .tip-item.danger { border-left-color: var(--accent-red); }
 
+    /* ===== LOG ===== */
     .log {
-      background: rgba(0,0,0,0.35); border-radius: 12px; padding: 12px 16px;
-      font-family: 'Courier New', monospace; font-size: 11px; color: #7a8aa5;
-      max-height: 140px; overflow-y: auto; line-height: 1.6;
-      border: 1px solid rgba(255,255,255,0.04);
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: 'Courier New', 'Consolas', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      max-height: 160px;
+      overflow-y: auto;
+      line-height: 1.6;
+      border: 1px solid var(--border);
     }
-    .log .time { color: #4a5a72; }
-    .log .ok { color: #52e69d; }
-    .log .err { color: #ff5f73; }
-    .log .warn { color: #ffd166; }
-    .log .info { color: #6f8cff; }
-    .log .ai { color: #ae7cff; }
+    .log .time { color: var(--text-muted); }
+    .log .ok { color: var(--accent-green); }
+    .log .err { color: var(--accent-red); }
+    .log .warn { color: var(--accent-yellow); }
+    .log .info { color: var(--brown-light); }
+    .log .ai { color: #ce93d8; }
+    .log::-webkit-scrollbar { width: 6px; }
+    .log::-webkit-scrollbar-track { background: transparent; }
+    .log::-webkit-scrollbar-thumb { background: rgba(212,165,116,0.2); border-radius: 3px; }
 
-    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+    /* ===== BOTTOM GRID ===== */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
     @media (max-width: 900px) { .bottom-grid { grid-template-columns: 1fr; } }
+
+    /* ===== QUOTE CARD ===== */
+    .quote-card {
+      margin-top: 16px;
+      padding: 20px 24px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(139,90,43,0.15), rgba(92,51,23,0.1));
+      border: 1px solid var(--border);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .quote-card::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      left: 20px;
+      font-size: 100px;
+      color: rgba(212,165,116,0.08);
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+    .quote-text {
+      font-size: 14px;
+      color: var(--brown-cream);
+      font-style: italic;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+    .quote-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
   </style>
 </head>
 <body>
 
 <div class="app">
+  <!-- HEADER -->
   <div class="header">
-    <h1>🎯 FocusMate AI <small>Smart Work Environment Monitor</small></h1>
+    <h1>
+      ☕ FocusMate AI
+      <small>Smart Work Environment Monitor</small>
+    </h1>
     <div class="status-badge">
       <span class="dot gray" id="statusDot"></span>
       <span id="statusText">Menunggu koneksi</span>
     </div>
   </div>
 
+  <!-- ALARM BANNER -->
+  <div class="alarm-banner" id="alarmBanner">
+    🚨 ALARM! RUANGAN TIDAK KONDUSIF - KEBISINGAN TINGGI 🚨
+  </div>
+
   <!-- MIC PANEL -->
-  <div class="mic-panel">
+  <div class="mic-panel" id="micPanel">
     <div class="mic-info">
       <div class="mic-icon off" id="micIcon">🎤</div>
       <div>
@@ -267,11 +702,9 @@
     <button class="btn btn-primary" id="micBtn" style="flex:0; min-width:180px;">🎤 Aktifkan Mic Laptop</button>
   </div>
 
-  <div class="alarm-banner" id="alarmBanner">
-    🚨 ALARM! RUANGAN TIDAK KONDUSIF - KEBISINGAN TINGGI 🚨
-  </div>
-
+  <!-- MAIN GRID -->
   <div class="main-grid">
+    <!-- GAUGE -->
     <div class="panel">
       <div class="label">🎯 Skor Fokus</div>
       <div class="focus-gauge">
@@ -285,6 +718,7 @@
       </div>
     </div>
 
+    <!-- BREAKDOWN -->
     <div class="panel">
       <div class="label">📊 Breakdown Komponen</div>
       <div class="breakdown-list">
@@ -293,42 +727,43 @@
             <span class="title">🔊 Kebisingan</span>
             <span class="score" id="soundScore">--</span>
           </div>
-          <div class="bar"><div class="fill" id="soundBar" style="width:0%;background:#6f8cff;"></div></div>
-          <div style="font-size:10px;color:#8899bb;margin-top:6px;" id="soundInfo">Menunggu data...</div>
+          <div class="bar"><div class="fill" id="soundBar" style="width:0%;"></div></div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:6px;" id="soundInfo">Menunggu data...</div>
         </div>
         <div class="breakdown-item">
           <div class="top">
             <span class="title">🌡️ Suhu</span>
             <span class="score" id="tempScore">--</span>
           </div>
-          <div class="bar"><div class="fill" id="tempBar" style="width:0%;background:#52e69d;"></div></div>
-          <div style="font-size:10px;color:#8899bb;margin-top:6px;" id="tempInfo">Menunggu data...</div>
+          <div class="bar"><div class="fill" id="tempBar" style="width:0%;"></div></div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:6px;" id="tempInfo">Menunggu data...</div>
         </div>
         <div class="breakdown-item">
           <div class="top">
             <span class="title">💡 Cahaya</span>
             <span class="score" id="lightScore">--</span>
           </div>
-          <div class="bar"><div class="fill" id="lightBar" style="width:0%;background:#ffd166;"></div></div>
-          <div style="font-size:10px;color:#8899bb;margin-top:6px;" id="lightInfo">Menunggu data...</div>
+          <div class="bar"><div class="fill" id="lightBar" style="width:0%;"></div></div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:6px;" id="lightInfo">Menunggu data...</div>
         </div>
         <div class="breakdown-item">
           <div class="top">
             <span class="title">😊 Postur (AI)</span>
             <span class="score" id="faceScore">--</span>
           </div>
-          <div class="bar"><div class="fill" id="faceBar" style="width:0%;background:#ae7cff;"></div></div>
-          <div style="font-size:10px;color:#8899bb;margin-top:6px;" id="faceInfo">Menunggu data...</div>
+          <div class="bar"><div class="fill" id="faceBar" style="width:0%;"></div></div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:6px;" id="faceInfo">Menunggu data...</div>
         </div>
       </div>
     </div>
 
+    <!-- KAMERA -->
     <div class="panel">
       <div class="label">📷 Deteksi Postur (AI Pose)</div>
       <div id="webcam-container">
         <div class="placeholder">
           🎥 Kamera belum aktif<br>
-          <span style="font-size:11px;color:#4a5a72;">Klik "Aktifkan Kamera"</span>
+          <span style="font-size:11px;color:var(--text-muted);">Klik "Aktifkan Kamera"</span>
         </div>
       </div>
       <div class="face-detection">
@@ -339,6 +774,7 @@
     </div>
   </div>
 
+  <!-- SENSOR CARDS -->
   <div class="sensor-section-title">📡 Sensor Real-time</div>
   <div class="sensor-grid-3" style="margin-bottom: 12px;">
     <div class="sensor-card">
@@ -376,13 +812,21 @@
     </div>
   </div>
 
+  <!-- STATUS BOX -->
   <div class="status-box normal" id="statusBox">
     <div class="title-status">🧠 Status Lingkungan Kerja</div>
     <div class="main-status" id="mainStatus">MENUNGGU DATA...</div>
     <div class="desc-status" id="descStatus">Hubungkan ESP32 & aktifkan kamera</div>
   </div>
 
-  <div class="controls">
+  <!-- QUOTE CARD -->
+  <div class="quote-card">
+    <div class="quote-label">💡 Kata Motivasi</div>
+    <div class="quote-text" id="quoteText">Tetap fokus, kamu bisa!</div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls" style="margin-top: 20px;">
     <button class="btn btn-primary" id="cameraBtn">📷 Aktifkan Kamera</button>
     <button class="btn btn-success" id="connectBtn">🔌 Hubungkan ESP32</button>
   </div>
@@ -393,10 +837,11 @@
   </div>
 
   <div class="controls">
-    <button class="btn btn-danger" id="testAlarmBtn">🚨 Test Alarm Laptop</button>
-    <button class="btn btn-warning" id="stopAlarmBtn">⏹️ Stop Alarm Laptop</button>
+    <button class="btn btn-danger" id="testAlarmBtn">🚨 Test Alarm</button>
+    <button class="btn btn-warning" id="stopAlarmBtn">⏹️ Stop Alarm</button>
   </div>
 
+  <!-- BOTTOM GRID -->
   <div class="bottom-grid">
     <div class="panel">
       <div class="label">💡 Saran Perbaikan</div>
@@ -421,9 +866,27 @@
   const URL_MODEL_POSE = "https://teachablemachine.withgoogle.com/models/VRCjTDFwO-/";
   const CONFIDENCE_THRESHOLD = 0.70;
   const STABLE_FRAMES_REQUIRED = 5;
-  const BAUD_RATE = 74880;
+  const BAUD_RATE = 74880;  // ★ Untuk ESP32 crystal 26MHz
   const ALARM_SOUND_THRESHOLD = 30;
+  const MIC_ALARM_THRESHOLD = 50;
   const FACE_SEND_INTERVAL = 2000;
+
+  // =========================================================
+  // QUOTES MOTIVASI
+  // =========================================================
+  const QUOTES = [
+    "Tetap fokus, kamu bisa!",
+    "Istirahat 5 menit itu OK!",
+    "Jaga postur, jaga sehat!",
+    "Sedikit lagi, teruskan!",
+    "Otak butuh oksigen, olahraga!",
+    "Air putih bantu konsentrasi",
+    "Mata butuh istirahat 20-20-20",
+    "Fokus = Kunci Sukses",
+    "Kamu hebat, terus maju!",
+    "Kerja cerdas, bukan keras!"
+  ];
+  let currentQuoteIndex = 0;
 
   // =========================================================
   // STATE
@@ -442,14 +905,14 @@
   let stableFrames = 0;
   let lastFaceSentTime = 0;
 
-  // Mic laptop state
+  // Mic laptop
   let micActive = false;
   let audioContext = null;
   let analyser = null;
   let micStream = null;
   let micLevel = 0;
   let lastMicSentTime = 0;
-  const MIC_SEND_INTERVAL = 200;  // Kirim ke ESP32 setiap 200ms
+  const MIC_SEND_INTERVAL = 200;
 
   let alarmActive = false;
   let alarmInterval = null;
@@ -529,21 +992,20 @@
     if (micActive) return;
     try {
       $("micBtn").disabled = true;
-      $("micBtn").textContent = "Meminta akses mic...";
+      $("micBtn").textContent = "Meminta akses...";
 
       micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const source = audioContext.createMediaStreamSource(micStream);
       analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
       analyser.smoothingTimeConstant = 0.5;
-      
       source.connect(analyser);
 
       micActive = true;
       $("micBtn").textContent = "✅ Mic Aktif";
       $("micIcon").classList.remove("off");
+      $("micPanel").classList.add("active");
       addLog("🎤 Mic laptop aktif!", "ok");
 
       detectSoundLevel();
@@ -561,45 +1023,34 @@
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(dataArray);
 
-    // Hitung rata-rata volume
     let sum = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-      sum += dataArray[i];
-    }
+    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
     const avg = sum / dataArray.length;
 
-    // Konversi ke 0-100
-    // avg: 0 = sunyi, 255 = sangat keras
-    micLevel = Math.round((avg / 255) * 100);
+    // Sensitivitas tinggi
+    micLevel = Math.round((avg / 150) * 100);
     micLevel = Math.max(0, Math.min(100, micLevel));
-
     sensorData.micLevel = micLevel;
 
-    // Update UI
     $("micLevelText").textContent = micLevel + "%";
     $("micBar").style.width = micLevel + "%";
-    
-    // Warna bar
-    if (micLevel > 70) $("micBar").style.background = "#ff5f73";
-    else if (micLevel > 40) $("micBar").style.background = "#ffd166";
-    else $("micBar").style.background = "linear-gradient(90deg, #6f8cff, #ae7cff)";
 
-    // Kirim ke ESP32 (throttled)
+    if (micLevel > 70) $("micBar").style.background = "linear-gradient(90deg, #e53935, #c62828)";
+    else if (micLevel > 40) $("micBar").style.background = "linear-gradient(90deg, #fbc02d, #f9a825)";
+    else $("micBar").style.background = "linear-gradient(90deg, var(--brown-2), var(--brown-light))";
+
     const now = Date.now();
     if (serialReady && now - lastMicSentTime > MIC_SEND_INTERVAL) {
       sendToESP32("MIC:" + micLevel + ":ON");
       lastMicSentTime = now;
     }
 
-    // Cek alarm dari mic laptop juga
     checkMicAlarm();
-
     requestAnimationFrame(detectSoundLevel);
   }
 
   function checkMicAlarm() {
-    // Alarm dari mic laptop jika level > 70%
-    if (micLevel > 70 && !alarmActive) {
+    if (micLevel > MIC_ALARM_THRESHOLD && !alarmActive) {
       startAlarm();
       addLog("🚨 Mic laptop: suara terlalu keras!", "warn");
     }
@@ -622,6 +1073,20 @@
   }
 
   // =========================================================
+  // QUOTE ROTATION
+  // =========================================================
+  function rotateQuote() {
+    $("quoteText").style.opacity = "0";
+    setTimeout(() => {
+      currentQuoteIndex = (currentQuoteIndex + 1) % QUOTES.length;
+      $("quoteText").textContent = QUOTES[currentQuoteIndex];
+      $("quoteText").style.transition = "opacity 0.5s";
+      $("quoteText").style.opacity = "1";
+    }, 300);
+  }
+  setInterval(rotateQuote, 8000);
+
+  // =========================================================
   // UPDATE UI
   // =========================================================
   function updateUI() {
@@ -629,14 +1094,14 @@
     $("gaugeScore").textContent = score;
     $("gaugeStatus").textContent = sensorData.focusStatus.replace(/_/g, " ");
 
-    let gaugeColor = "#52e69d";
-    if (score < 40) gaugeColor = "#ff5f73";
-    else if (score < 60) gaugeColor = "#ffd166";
-    else if (score < 80) gaugeColor = "#6f8cff";
+    let gaugeColor = "var(--accent-green)";
+    if (score < 40) gaugeColor = "var(--accent-red)";
+    else if (score < 60) gaugeColor = "var(--accent-yellow)";
+    else if (score < 80) gaugeColor = "var(--brown-light)";
 
     const degrees = (score / 100) * 360;
     $("gaugeCircle").style.background =
-      `conic-gradient(${gaugeColor} 0deg, ${gaugeColor} ${degrees}deg, rgba(255,255,255,0.08) ${degrees}deg)`;
+      `conic-gradient(${gaugeColor} 0deg, ${gaugeColor} ${degrees}deg, rgba(212,165,116,0.08) ${degrees}deg)`;
     $("gaugeScore").style.color = gaugeColor;
 
     updateBar("sound", sensorData.soundScore, 
@@ -672,11 +1137,7 @@
   }
 
   function checkNoiseAlarm() {
-    // ★ Alarm aktif jika salah satu mendeteksi:
-    // - KY-037: soundScore < 30
-    // - Mic laptop: micLevel > 70
-    const shouldAlarm = (sensorData.soundScore < ALARM_SOUND_THRESHOLD) || (micLevel > 70);
-    
+    const shouldAlarm = (sensorData.soundScore < ALARM_SOUND_THRESHOLD) || (micLevel > MIC_ALARM_THRESHOLD);
     if (shouldAlarm && !alarmActive) {
       startAlarm();
       setStatus("TIDAK KONDUSIF", "red");
@@ -692,10 +1153,10 @@
     scoreEl.textContent = score;
     infoEl.textContent = info;
 
-    let color = "#52e69d";
-    if (score < 30) color = "#ff5f73";
-    else if (score < 60) color = "#ffd166";
-    else if (score < 80) color = "#6f8cff";
+    let color = "var(--accent-green)";
+    if (score < 30) color = "var(--accent-red)";
+    else if (score < 60) color = "var(--accent-yellow)";
+    else if (score < 80) color = "var(--brown-light)";
 
     bar.style.width = score + "%";
     bar.style.background = color;
@@ -776,12 +1237,11 @@
     if (cameraReady) return;
     try {
       $("cameraBtn").disabled = true;
-      $("cameraBtn").textContent = "Memuat model pose...";
+      $("cameraBtn").textContent = "Memuat model...";
       addLog("Memuat model pose...", "info");
 
       const modelURL = URL_MODEL_POSE + "model.json";
       const metadataURL = URL_MODEL_POSE + "metadata.json";
-
       modelPose = await tmPose.load(modelURL, metadataURL);
 
       const labels = modelPose.getClassLabels();
@@ -817,11 +1277,11 @@
     grid.innerHTML = "";
     labels.forEach((label) => {
       const upper = label.toUpperCase();
-      let color = "#6f8cff";
-      if (upper.includes("FOKUS")) color = "#52e69d";
-      else if (upper.includes("MENGANTUK")) color = "#ffd166";
-      else if (upper.includes("DISTRAKSI")) color = "#ff5f73";
-      else if (upper.includes("TIDAK")) color = "#4a5a72";
+      let color = "var(--brown-light)";
+      if (upper.includes("FOKUS")) color = "var(--accent-green)";
+      else if (upper.includes("MENGANTUK")) color = "var(--accent-yellow)";
+      else if (upper.includes("DISTRAKSI")) color = "var(--accent-red)";
+      else if (upper.includes("TIDAK")) color = "var(--text-muted)";
 
       const id = "conf_" + label.replace(/[^a-zA-Z0-9]/g, "_");
       const valId = "val_" + label.replace(/[^a-zA-Z0-9]/g, "_");
@@ -829,7 +1289,7 @@
       grid.innerHTML += `
         <div class="conf-item">
           <div class="top-row">
-            <span style="color:#b0c0d8;">${label}</span>
+            <span style="color:var(--text-secondary);">${label}</span>
             <span id="${valId}" style="font-weight:700;">0%</span>
           </div>
           <div class="bar"><div class="fill" id="${id}" style="width:0%;background:${color};"></div></div>
@@ -867,7 +1327,7 @@
 
     if (detected.includes("TIDAK_ADA")) {
       $("faceDetection").textContent = "📷 Tidak ada orang";
-      $("faceDetection").style.color = "#7a8aa5";
+      $("faceDetection").style.color = "var(--text-muted)";
       currentPoseLabel = ""; stableFrames = 0;
       return;
     }
@@ -876,10 +1336,10 @@
     else { currentPoseLabel = detected; stableFrames = 1; }
 
     $("faceDetection").textContent = detected.replace(/_/g, " ");
-    let faceColor = "#6f8cff";
-    if (detected.includes("FOKUS")) faceColor = "#52e69d";
-    else if (detected.includes("MENGANTUK")) faceColor = "#ffd166";
-    else if (detected.includes("DISTRAKSI")) faceColor = "#ff5f73";
+    let faceColor = "var(--brown-light)";
+    if (detected.includes("FOKUS")) faceColor = "var(--accent-green)";
+    else if (detected.includes("MENGANTUK")) faceColor = "var(--accent-yellow)";
+    else if (detected.includes("DISTRAKSI")) faceColor = "var(--accent-red)";
     $("faceDetection").style.color = faceColor;
 
     const now = Date.now();
@@ -1016,13 +1476,13 @@
   });
 
   $("testAlarmBtn").addEventListener("click", () => {
-    addLog("🚨 TEST ALARM LAPTOP!", "warn");
+    addLog("🚨 TEST ALARM!", "warn");
     startAlarm();
   });
 
   $("stopAlarmBtn").addEventListener("click", () => {
     stopAlarm();
-    addLog("⏹️ Alarm laptop di-stop manual", "ok");
+    addLog("⏹️ Alarm di-stop", "ok");
   });
 
   document.body.addEventListener("click", initAudio, { once: true });
@@ -1030,7 +1490,7 @@
   // =========================================================
   // INIT
   // =========================================================
-  addLog("🎯 FocusMate AI siap.", "info");
+  addLog("☕ FocusMate AI siap.", "info");
   addLog("Model Pose: " + URL_MODEL_POSE.substring(0, 50) + "...", "info");
   addLog("Kelas: FOKUS, MENGANTUK, DISTRAKSI, TIDAK_ADA_ORANG", "info");
   addLog("Audio: KY-037 + Mic Laptop (fusion)", "info");
