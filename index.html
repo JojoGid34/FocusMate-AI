@@ -30,51 +30,76 @@
       src: local('Inter ExtraBold'), local('Inter-ExtraBold'), local('Segoe UI Black'), local('Arial Black');
     }
 
-    /* ===== THEME COKELAT ===== */
+    /* ===== THEME COKELAT TUA ===== */
     :root {
-      --bg-primary: #1a0f0a;
-      --bg-secondary: #2d1810;
-      --bg-tertiary: #3d2418;
-      --brown-1: #5c3317;
-      --brown-2: #8b5a2b;
-      --brown-3: #a0522d;
+      --bg-deep: #0d0705;
+      --bg-base: #1a0f0a;
+      --bg-elev: #241410;
+      --brown-darkest: #2d1810;
+      --brown-dark: #3d2418;
+      --brown-mid: #5c3317;
+      --brown-warm: #8b5a2b;
       --brown-light: #d4a574;
-      --brown-cream: #f5e6d3;
+      --brown-cream: #e8d4b8;
       --accent-green: #7cb342;
       --accent-yellow: #fbc02d;
       --accent-red: #e53935;
-      --text-primary: #f5e6d3;
+      --accent-glow: rgba(212, 165, 116, 0.4);
+      --text-primary: #f0e4d4;
       --text-secondary: #c9a88a;
       --text-muted: #8b6f5c;
-      --border: rgba(212, 165, 116, 0.15);
-      --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --glass-bg: rgba(61, 36, 24, 0.4);
+      --glass-border: rgba(212, 165, 116, 0.15);
+      --glass-highlight: rgba(255, 255, 255, 0.05);
+      --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+      --shadow-glow: 0 0 40px rgba(212, 165, 116, 0.1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: 
-        radial-gradient(circle at 20% 0%, rgba(139, 90, 43, 0.15), transparent 40%),
-        radial-gradient(circle at 80% 100%, rgba(92, 51, 23, 0.2), transparent 40%),
-        linear-gradient(180deg, var(--bg-primary), #0f0805);
-      color: var(--text-primary);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-      font-weight: 400;
-      -webkit-font-smoothing: antialiased;
+
+    html, body {
+      overflow-x: hidden;
     }
 
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: 
+        radial-gradient(circle at 15% 10%, rgba(139, 90, 43, 0.18), transparent 35%),
+        radial-gradient(circle at 85% 90%, rgba(92, 51, 23, 0.25), transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(61, 36, 24, 0.15), transparent 60%),
+        linear-gradient(180deg, #0d0705, #1a0f0a 50%, #0a0503);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 24px;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+    }
+
+    /* ===== BACKGROUND DECORATION ===== */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: 
+        radial-gradient(1px 1px at 20% 30%, rgba(212, 165, 116, 0.4), transparent),
+        radial-gradient(1px 1px at 60% 70%, rgba(212, 165, 116, 0.3), transparent),
+        radial-gradient(1px 1px at 80% 20%, rgba(212, 165, 116, 0.35), transparent),
+        radial-gradient(1px 1px at 40% 80%, rgba(212, 165, 116, 0.3), transparent);
+      background-size: 200px 200px, 300px 300px, 250px 250px, 350px 350px;
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== APP CONTAINER ===== */
     .app {
-      max-width: 1400px;
+      max-width: 1440px;
       width: 100%;
-      background: linear-gradient(145deg, var(--bg-secondary), var(--bg-primary));
-      border-radius: 24px;
-      padding: 28px 32px 34px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
 
     /* ===== HEADER ===== */
@@ -83,39 +108,59 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 24px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border);
+      gap: 16px;
+      margin-bottom: 28px;
+      padding: 20px 28px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg), inset 0 1px 0 var(--glass-highlight);
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212,165,116,0.4), transparent);
     }
     .header h1 {
       font-size: 26px;
       font-weight: 800;
-      background: linear-gradient(135deg, var(--brown-light), var(--brown-2));
+      background: linear-gradient(135deg, var(--brown-light), var(--brown-warm));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       letter-spacing: -0.02em;
     }
+    .header h1 .logo-icon {
+      font-size: 30px;
+      filter: drop-shadow(0 0 12px rgba(212,165,116,0.5));
+    }
     .header h1 small {
-      font-size: 13px;
+      font-size: 12px;
       -webkit-text-fill-color: var(--text-secondary);
       font-weight: 400;
-      letter-spacing: 0;
+      letter-spacing: 0.02em;
     }
     .status-badge {
-      padding: 8px 18px;
+      padding: 10px 20px;
       border-radius: 40px;
       font-size: 13px;
       font-weight: 600;
       background: rgba(212, 165, 116, 0.08);
-      border: 1px solid var(--border);
+      border: 1px solid var(--glass-border);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     .dot {
       width: 10px;
@@ -134,118 +179,126 @@
     .alarm-banner {
       display: none;
       padding: 18px 24px;
-      border-radius: 16px;
+      border-radius: 18px;
       text-align: center;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
-      margin-bottom: 20px;
-      border: 2px solid var(--accent-red);
-      background: linear-gradient(135deg, rgba(229,57,53,0.15), rgba(229,57,53,0.08));
+      margin-bottom: 24px;
+      border: 1px solid var(--accent-red);
+      background: linear-gradient(135deg, rgba(229,57,53,0.2), rgba(229,57,53,0.08));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       color: var(--accent-red);
       animation: alarm-pulse 0.8s infinite;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.03em;
+      box-shadow: 0 0 40px rgba(229,57,53,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .alarm-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
     }
     .alarm-banner.show { display: block; }
     @keyframes alarm-pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.01); opacity: 0.85; }
-    }
-
-    /* ===== MIC PANEL ===== */
-    .mic-panel {
-      background: linear-gradient(135deg, rgba(139,90,43,0.2), rgba(92,51,23,0.15));
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-      transition: all 0.3s;
-    }
-    .mic-panel.active {
-      border-color: rgba(124,179,66,0.4);
-      box-shadow: 0 0 30px rgba(124,179,66,0.08);
-    }
-    .mic-panel .mic-info { display: flex; align-items: center; gap: 14px; }
-    .mic-panel .mic-icon {
-      font-size: 32px;
-      animation: mic-pulse 2s infinite;
-      transition: all 0.3s;
-    }
-    .mic-panel .mic-icon.off { animation: none; opacity: 0.35; }
-    @keyframes mic-pulse {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.12); }
-    }
-    .mic-panel .mic-level {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--brown-light);
-      font-variant-numeric: tabular-nums;
-    }
-    .mic-panel .mic-label {
-      font-size: 11px;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      font-weight: 600;
-    }
-    .mic-bar {
-      flex: 1;
-      min-width: 200px;
-      height: 12px;
-      background: rgba(212,165,116,0.08);
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-    }
-    .mic-bar .fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--brown-2), var(--brown-light));
-      border-radius: 10px;
-      transition: width 0.1s, background 0.3s;
-      box-shadow: 0 0 12px rgba(212,165,116,0.4);
+      50% { transform: scale(1.005); }
     }
 
-    /* ===== MAIN GRID ===== */
-    .main-grid {
+    /* ===== LAYOUT UNIK: ASYMMETRIC GRID ===== */
+    .layout {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
+      grid-template-columns: 1.1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 20px;
       margin-bottom: 20px;
     }
-    @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 700px) { .main-grid { grid-template-columns: 1fr; } }
 
-    .panel {
-      background: linear-gradient(180deg, rgba(61,36,24,0.5), rgba(45,24,16,0.5));
-      border-radius: 20px;
-      padding: 20px;
-      border: 1px solid var(--border);
-      transition: all 0.3s;
+    /* Gauge + Breakdown dalam 1 panel besar */
+    .panel-focus {
+      grid-column: 1;
+      grid-row: 1 / 3;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 20px;
+    }
+
+    /* Kamera + Sensor dalam 1 kolom */
+    .panel-camera {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .panel-sensors {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    @media (max-width: 1000px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .panel-focus { grid-column: 1; grid-row: auto; }
+      .panel-camera { grid-column: 1; grid-row: auto; }
+      .panel-sensors { grid-column: 1; grid-row: auto; }
+    }
+
+    /* ===== GLASS CARD ===== */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
+      border: 1px solid var(--glass-border);
+      border-radius: 22px;
+      box-shadow: var(--shadow-lg), inset 0 1px 0 var(--glass-highlight);
       position: relative;
       overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .panel::before {
+    .glass::before {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 1px;
       background: linear-gradient(90deg, transparent, rgba(212,165,116,0.3), transparent);
+      pointer-events: none;
     }
-    .panel .label {
-      font-size: 11px;
+    .glass:hover {
+      border-color: rgba(212, 165, 116, 0.25);
+      box-shadow: var(--shadow-lg), 0 0 60px rgba(212, 165, 116, 0.08), inset 0 1px 0 var(--glass-highlight);
+    }
+
+    .panel-inner {
+      padding: 22px 24px;
+    }
+
+    .panel-label {
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.18em;
       color: var(--text-secondary);
-      margin-bottom: 14px;
-      font-weight: 600;
+      margin-bottom: 16px;
+      font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+    }
+    .panel-label .icon-box {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, rgba(212,165,116,0.2), rgba(212,165,116,0.05));
+      border: 1px solid rgba(212,165,116,0.2);
+      display: grid;
+      place-items: center;
+      font-size: 11px;
     }
 
     /* ===== GAUGE ===== */
@@ -253,64 +306,101 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 16px 0;
     }
     .gauge-circle {
       position: relative;
-      width: 200px;
-      height: 200px;
+      width: 220px;
+      height: 220px;
       border-radius: 50%;
-      background: conic-gradient(var(--accent-green) 0deg, var(--accent-green) 0deg, rgba(212,165,116,0.08) 0deg);
+      background: conic-gradient(var(--accent-green) 0deg, var(--accent-green) 0deg, rgba(212,165,116,0.06) 0deg);
       display: grid;
       place-items: center;
-      transition: background 0.5s;
-      box-shadow: 0 0 40px rgba(212,165,116,0.1);
+      transition: background 0.6s;
+      box-shadow: 
+        0 0 60px rgba(212,165,116,0.15),
+        inset 0 0 40px rgba(0,0,0,0.4);
+    }
+    .gauge-circle::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, transparent, rgba(212,165,116,0.15), transparent);
+      animation: rotate-slow 8s linear infinite;
+    }
+    @keyframes rotate-slow {
+      to { transform: rotate(360deg); }
     }
     .gauge-inner {
-      width: 160px;
-      height: 160px;
+      width: 178px;
+      height: 178px;
       border-radius: 50%;
-      background: linear-gradient(145deg, var(--bg-secondary), var(--bg-primary));
+      background: radial-gradient(circle at 50% 30%, var(--bg-elev), var(--bg-deep));
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+      box-shadow: 
+        inset 0 0 30px rgba(0,0,0,0.7),
+        0 0 0 1px rgba(212,165,116,0.1);
+      position: relative;
+      z-index: 1;
     }
     .gauge-score {
-      font-size: 64px;
+      font-size: 68px;
       font-weight: 800;
       line-height: 1;
-      letter-spacing: -0.04em;
+      letter-spacing: -0.05em;
       transition: color 0.5s;
       font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 30px currentColor;
     }
     .gauge-label {
-      font-size: 11px;
-      color: var(--text-secondary);
+      font-size: 10px;
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.15em;
-      margin-top: 4px;
+      letter-spacing: 0.2em;
+      margin-top: 6px;
       font-weight: 600;
     }
     .gauge-status {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
-      margin-top: 18px;
-      letter-spacing: 0.06em;
+      margin-top: 20px;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      padding: 8px 20px;
+      border-radius: 20px;
+      background: rgba(212,165,116,0.08);
+      border: 1px solid var(--glass-border);
     }
 
-    /* ===== BREAKDOWN ===== */
+    /* ===== BREAKDOWN BARS ===== */
     .breakdown-list { display: flex; flex-direction: column; gap: 12px; }
     .breakdown-item {
-      background: rgba(212,165,116,0.04);
-      border-radius: 12px;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(61,36,24,0.4), rgba(45,24,16,0.2));
+      border-radius: 14px;
+      padding: 14px 16px;
+      border: 1px solid rgba(212,165,116,0.1);
       transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
     }
-    .breakdown-item:hover { border-color: rgba(212,165,116,0.3); }
+    .breakdown-item::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, transparent, rgba(212,165,116,0.4), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .breakdown-item:hover::before { opacity: 1; }
+    .breakdown-item:hover {
+      border-color: rgba(212,165,116,0.25);
+      transform: translateX(2px);
+    }
     .breakdown-item .top {
       display: flex;
       justify-content: space-between;
@@ -321,59 +411,285 @@
       font-size: 12px;
       color: var(--text-primary);
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .breakdown-item .title .icon-small {
+      font-size: 14px;
+      filter: drop-shadow(0 0 6px rgba(212,165,116,0.4));
     }
     .breakdown-item .score {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
     }
     .breakdown-item .bar {
       width: 100%;
-      height: 8px;
+      height: 6px;
       background: rgba(212,165,116,0.08);
       border-radius: 10px;
       overflow: hidden;
+      position: relative;
     }
     .breakdown-item .bar .fill {
       height: 100%;
       border-radius: 10px;
-      transition: width 0.5s, background 0.5s;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s;
+      position: relative;
+    }
+    .breakdown-item .bar .fill::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: bar-shimmer 2s infinite;
+    }
+    @keyframes bar-shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    .breakdown-item .info-text {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ===== MIC PANEL ===== */
+    .mic-panel {
+      background: linear-gradient(135deg, rgba(92,51,23,0.3), rgba(61,36,24,0.2));
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 18px 24px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      transition: all 0.4s;
+      box-shadow: var(--shadow-lg), inset 0 1px 0 var(--glass-highlight);
+      position: relative;
+      overflow: hidden;
+    }
+    .mic-panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212,165,116,0.4), transparent);
+    }
+    .mic-panel.active {
+      border-color: rgba(124,179,66,0.4);
+      box-shadow: var(--shadow-lg), 0 0 50px rgba(124,179,66,0.1), inset 0 1px 0 var(--glass-highlight);
+    }
+    .mic-info { display: flex; align-items: center; gap: 16px; }
+    .mic-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(212,165,116,0.15), rgba(212,165,116,0.05));
+      border: 1px solid rgba(212,165,116,0.2);
+      display: grid;
+      place-items: center;
+      font-size: 26px;
+      position: relative;
+    }
+    .mic-icon-wrap.active {
+      border-color: rgba(124,179,66,0.4);
+      box-shadow: 0 0 30px rgba(124,179,66,0.2);
+    }
+    .mic-icon-wrap .pulse-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 20px;
+      border: 2px solid rgba(124,179,66,0.4);
+      opacity: 0;
+      animation: pulse-ring 2s infinite;
+    }
+    .mic-icon-wrap.active .pulse-ring { opacity: 1; }
+    @keyframes pulse-ring {
+      0% { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(1.15); opacity: 0; }
+    }
+    .mic-label {
+      font-size: 10px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-weight: 700;
+    }
+    .mic-level {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--brown-light);
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
+    }
+    .mic-bar-wrap {
+      flex: 1;
+      min-width: 200px;
+    }
+    .mic-bar-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .mic-bar {
+      height: 14px;
+      background: rgba(212,165,116,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(212,165,116,0.1);
+    }
+    .mic-bar .fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--brown-warm), var(--brown-light));
+      border-radius: 10px;
+      transition: width 0.1s, background 0.3s;
+      box-shadow: 0 0 20px rgba(212,165,116,0.4);
+      position: relative;
+    }
+
+    /* ===== SENSOR CARDS ===== */
+    .sensor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .sensor-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 600px) {
+      .sensor-grid-3 { grid-template-columns: 1fr 1fr; }
+    }
+    .sensor-card {
+      background: linear-gradient(135deg, rgba(61,36,24,0.5), rgba(45,24,16,0.3));
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(212,165,116,0.1);
+      border-radius: 16px;
+      padding: 16px 18px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .sensor-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212,165,116,0.3), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .sensor-card:hover {
+      border-color: rgba(212,165,116,0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .sensor-card:hover::before { opacity: 1; }
+    .sensor-card .title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sensor-card .value {
+      font-size: 24px;
+      font-weight: 800;
+      transition: color 0.3s;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.03em;
+    }
+    .sensor-card .sub {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      letter-spacing: 0.02em;
+    }
+    .sensor-card .indicator {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--bg-elev);
+      transition: all 0.3s;
+    }
+    .sensor-card .indicator.on {
+      background: var(--accent-green);
+      box-shadow: 0 0 12px var(--accent-green);
+    }
+    .sensor-card .indicator.warn {
+      background: var(--accent-yellow);
+      box-shadow: 0 0 12px var(--accent-yellow);
+    }
+    .sensor-card .indicator.danger {
+      background: var(--accent-red);
+      box-shadow: 0 0 12px var(--accent-red);
+      animation: blink 0.5s infinite;
     }
 
     /* ===== KAMERA ===== */
     #webcam-container {
-      aspect-ratio: 1;
-      background: var(--bg-primary);
-      border-radius: 14px;
+      aspect-ratio: 4/3;
+      background: var(--bg-deep);
+      border-radius: 16px;
       overflow: hidden;
       display: grid;
       place-items: center;
-      border: 1px solid var(--border);
-      margin-bottom: 12px;
+      border: 1px solid rgba(212,165,116,0.15);
+      margin-bottom: 14px;
       position: relative;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+    }
+    #webcam-container::after {
+      content: '';
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(212,165,116,0.15);
+      border-radius: 10px;
+      pointer-events: none;
     }
     #webcam-container canvas { width: 100%; height: 100%; object-fit: cover; }
     .placeholder { color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px; }
 
     .face-detection {
-      background: rgba(212,165,116,0.04);
-      border-radius: 10px;
-      padding: 10px 14px;
+      background: linear-gradient(135deg, rgba(61,36,24,0.5), rgba(45,24,16,0.3));
+      border: 1px solid rgba(212,165,116,0.1);
+      border-radius: 12px;
+      padding: 12px 16px;
       text-align: center;
-      margin-bottom: 10px;
-      border: 1px solid var(--border);
+      margin-bottom: 12px;
     }
     .face-detection .label-face {
       font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.15em;
       color: var(--text-muted);
-      font-weight: 600;
+      font-weight: 700;
     }
     .face-detection .value-face {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 800;
-      margin-top: 2px;
+      margin-top: 4px;
       letter-spacing: 0.02em;
     }
 
@@ -385,15 +701,19 @@
     .conf-item {
       background: rgba(212,165,116,0.04);
       border-radius: 8px;
-      padding: 6px 10px;
+      padding: 8px 12px;
       font-size: 11px;
-      border: 1px solid rgba(212,165,116,0.06);
+      border: 1px solid rgba(212,165,116,0.08);
       transition: all 0.2s;
+    }
+    .conf-item:hover {
+      border-color: rgba(212,165,116,0.2);
     }
     .conf-item .top-row {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
+      font-weight: 600;
     }
     .conf-item .bar {
       width: 100%;
@@ -408,114 +728,65 @@
       transition: width 0.15s;
     }
 
-    /* ===== SENSOR CARDS ===== */
-    .sensor-section-title {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--text-secondary);
-      margin-bottom: 12px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .sensor-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .sensor-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-    .sensor-card {
-      background: linear-gradient(180deg, rgba(61,36,24,0.4), rgba(45,24,16,0.4));
-      border-radius: 14px;
-      padding: 14px 16px;
-      border: 1px solid var(--border);
-      transition: all 0.3s;
-      position: relative;
-    }
-    .sensor-card .title {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-    .sensor-card .value {
-      font-size: 22px;
-      font-weight: 800;
-      transition: color 0.3s;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -0.02em;
-    }
-    .sensor-card .sub {
-      font-size: 10px;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }
-    .sensor-card .indicator {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--bg-tertiary);
-      transition: all 0.3s;
-    }
-    .sensor-card .indicator.on {
-      background: var(--accent-green);
-      box-shadow: 0 0 10px var(--accent-green);
-    }
-    .sensor-card .indicator.warn {
-      background: var(--accent-yellow);
-      box-shadow: 0 0 10px var(--accent-yellow);
-    }
-    .sensor-card .indicator.danger {
-      background: var(--accent-red);
-      box-shadow: 0 0 10px var(--accent-red);
-      animation: blink 0.5s infinite;
-    }
-
     /* ===== STATUS BOX ===== */
     .status-box {
-      padding: 20px 24px;
-      border-radius: 16px;
+      padding: 22px 28px;
+      border-radius: 20px;
       text-align: center;
-      border: 2px solid transparent;
-      transition: all 0.3s;
-      margin-bottom: 16px;
-      background: rgba(212,165,116,0.04);
+      border: 1px solid transparent;
+      transition: all 0.4s;
+      margin-bottom: 20px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      position: relative;
+      overflow: hidden;
+    }
+    .status-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05), transparent 70%);
+      pointer-events: none;
     }
     .status-box .title-status {
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.2em;
       color: var(--text-muted);
-      margin-bottom: 8px;
-      font-weight: 600;
+      margin-bottom: 10px;
+      font-weight: 700;
     }
     .status-box .main-status {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 800;
       letter-spacing: 0.02em;
+      position: relative;
+      z-index: 1;
     }
     .status-box .desc-status {
       font-size: 12px;
       color: var(--text-secondary);
-      margin-top: 6px;
+      margin-top: 8px;
+      position: relative;
+      z-index: 1;
     }
     .status-box.normal {
-      background: linear-gradient(135deg, rgba(124,179,66,0.1), rgba(124,179,66,0.05));
-      border-color: rgba(124,179,66,0.4);
+      background: linear-gradient(135deg, rgba(124,179,66,0.12), rgba(124,179,66,0.04));
+      border-color: rgba(124,179,66,0.3);
+      box-shadow: 0 0 40px rgba(124,179,66,0.08);
     }
     .status-box.normal .main-status { color: var(--accent-green); }
     .status-box.pantau {
-      background: linear-gradient(135deg, rgba(251,192,45,0.1), rgba(251,192,45,0.05));
-      border-color: rgba(251,192,45,0.4);
+      background: linear-gradient(135deg, rgba(251,192,45,0.12), rgba(251,192,45,0.04));
+      border-color: rgba(251,192,45,0.3);
+      box-shadow: 0 0 40px rgba(251,192,45,0.08);
     }
     .status-box.pantau .main-status { color: var(--accent-yellow); }
     .status-box.buruk {
-      background: linear-gradient(135deg, rgba(229,57,53,0.12), rgba(229,57,53,0.06));
-      border-color: rgba(229,57,53,0.5);
+      background: linear-gradient(135deg, rgba(229,57,53,0.15), rgba(229,57,53,0.05));
+      border-color: rgba(229,57,53,0.4);
       animation: pulse-danger 1.5s infinite;
+      box-shadow: 0 0 40px rgba(229,57,53,0.15);
     }
     .status-box.buruk .main-status { color: var(--accent-red); }
     @keyframes pulse-danger {
@@ -526,86 +797,129 @@
     /* ===== BUTTONS ===== */
     .controls {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
     .btn {
-      padding: 13px 20px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
+      padding: 14px 22px;
+      border-radius: 14px;
+      border: 1px solid rgba(212,165,116,0.15);
       background: rgba(212,165,116,0.06);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       color: var(--text-primary);
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s;
       font-size: 13px;
       flex: 1;
       min-width: 130px;
       font-family: inherit;
       letter-spacing: 0.02em;
+      position: relative;
+      overflow: hidden;
     }
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .btn:hover:not(:disabled)::before { opacity: 1; }
     .btn:hover:not(:disabled) {
       background: rgba(212,165,116,0.12);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
       border-color: rgba(212,165,116,0.3);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .btn:active:not(:disabled) {
+      transform: translateY(0);
     }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-primary {
-      background: linear-gradient(135deg, var(--brown-2), var(--brown-1));
+      background: linear-gradient(135deg, var(--brown-warm), var(--brown-mid));
       border-color: transparent;
       color: var(--brown-cream);
+      box-shadow: 0 4px 16px rgba(139,90,43,0.3);
     }
     .btn-primary:hover:not(:disabled) {
-      background: linear-gradient(135deg, var(--brown-3), var(--brown-2));
+      background: linear-gradient(135deg, var(--brown-light), var(--brown-warm));
+      box-shadow: 0 8px 28px rgba(139,90,43,0.5);
     }
     .btn-success {
       background: linear-gradient(135deg, #689f38, #558b2f);
       border-color: transparent;
       color: white;
     }
+    .btn-success:hover:not(:disabled) {
+      box-shadow: 0 8px 28px rgba(104,159,56,0.4);
+    }
     .btn-danger {
       background: linear-gradient(135deg, #e53935, #c62828);
       border-color: transparent;
       color: white;
+    }
+    .btn-danger:hover:not(:disabled) {
+      box-shadow: 0 8px 28px rgba(229,57,53,0.4);
     }
     .btn-warning {
       background: linear-gradient(135deg, #fbc02d, #f9a825);
       border-color: transparent;
       color: #1a0f0a;
     }
+    .btn-warning:hover:not(:disabled) {
+      box-shadow: 0 8px 28px rgba(251,192,45,0.4);
+    }
 
-    /* ===== TIPS ===== */
-    .tips-list { display: flex; flex-direction: column; gap: 8px; }
+    /* ===== TIPS & LOG ===== */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    @media (max-width: 900px) { .bottom-grid { grid-template-columns: 1fr; } }
+
+    .tips-list { display: flex; flex-direction: column; gap: 10px; }
     .tip-item {
-      background: rgba(212,165,116,0.04);
-      border-radius: 10px;
-      padding: 12px 16px;
+      background: linear-gradient(135deg, rgba(61,36,24,0.4), rgba(45,24,16,0.2));
+      border-radius: 12px;
+      padding: 14px 18px;
       font-size: 12px;
       color: var(--text-secondary);
       border-left: 3px solid var(--brown-light);
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      transition: all 0.2s;
-      line-height: 1.5;
+      gap: 12px;
+      transition: all 0.25s;
+      line-height: 1.6;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .tip-item:hover {
+      transform: translateX(4px);
+      background: linear-gradient(135deg, rgba(61,36,24,0.6), rgba(45,24,16,0.3));
     }
     .tip-item.success { border-left-color: var(--accent-green); }
     .tip-item.warning { border-left-color: var(--accent-yellow); }
     .tip-item.danger { border-left-color: var(--accent-red); }
 
-    /* ===== LOG ===== */
     .log {
       background: rgba(0,0,0,0.3);
-      border-radius: 12px;
-      padding: 14px 16px;
+      border-radius: 14px;
+      padding: 16px 18px;
       font-family: 'Courier New', 'Consolas', monospace;
       font-size: 11px;
       color: var(--text-muted);
-      max-height: 160px;
+      max-height: 200px;
       overflow-y: auto;
-      line-height: 1.6;
-      border: 1px solid var(--border);
+      line-height: 1.7;
+      border: 1px solid rgba(212,165,116,0.08);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     .log .time { color: var(--text-muted); }
     .log .ok { color: var(--accent-green); }
@@ -617,54 +931,64 @@
     .log::-webkit-scrollbar-track { background: transparent; }
     .log::-webkit-scrollbar-thumb { background: rgba(212,165,116,0.2); border-radius: 3px; }
 
-    /* ===== BOTTOM GRID ===== */
-    .bottom-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 20px;
-    }
-    @media (max-width: 900px) { .bottom-grid { grid-template-columns: 1fr; } }
-
     /* ===== QUOTE CARD ===== */
     .quote-card {
-      margin-top: 16px;
-      padding: 20px 24px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(139,90,43,0.15), rgba(92,51,23,0.1));
-      border: 1px solid var(--border);
+      margin-top: 20px;
+      padding: 24px 32px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(139,90,43,0.15), rgba(92,51,23,0.08));
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
+      border: 1px solid var(--glass-border);
       text-align: center;
       position: relative;
       overflow: hidden;
+      box-shadow: var(--shadow-lg), inset 0 1px 0 var(--glass-highlight);
     }
     .quote-card::before {
       content: '"';
       position: absolute;
-      top: -20px;
-      left: 20px;
-      font-size: 100px;
+      top: -30px;
+      left: 24px;
+      font-size: 130px;
       color: rgba(212,165,116,0.08);
       font-family: Georgia, serif;
       line-height: 1;
+      pointer-events: none;
     }
-    .quote-text {
-      font-size: 14px;
-      color: var(--brown-cream);
-      font-style: italic;
-      line-height: 1.6;
-      position: relative;
-      z-index: 1;
+    .quote-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212,165,116,0.4), transparent);
     }
     .quote-label {
       font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.2em;
       color: var(--text-muted);
-      margin-bottom: 8px;
-      font-weight: 600;
+      margin-bottom: 10px;
+      font-weight: 700;
       position: relative;
       z-index: 1;
     }
+    .quote-text {
+      font-size: 15px;
+      color: var(--brown-cream);
+      font-style: italic;
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+      transition: opacity 0.5s;
+      font-weight: 500;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(212,165,116,0.05); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(212,165,116,0.2); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(212,165,116,0.3); }
   </style>
 </head>
 <body>
@@ -673,7 +997,8 @@
   <!-- HEADER -->
   <div class="header">
     <h1>
-      ☕ FocusMate AI
+      <span class="logo-icon">☕</span>
+      FocusMate AI
       <small>Smart Work Environment Monitor</small>
     </h1>
     <div class="status-badge">
@@ -690,125 +1015,160 @@
   <!-- MIC PANEL -->
   <div class="mic-panel" id="micPanel">
     <div class="mic-info">
-      <div class="mic-icon off" id="micIcon">🎤</div>
+      <div class="mic-icon-wrap" id="micIconWrap">
+        <span id="micIcon">🎤</span>
+        <span class="pulse-ring"></span>
+      </div>
       <div>
         <div class="mic-label">Mic Laptop</div>
         <div class="mic-level" id="micLevelText">OFF</div>
       </div>
     </div>
-    <div class="mic-bar">
-      <div class="fill" id="micBar" style="width:0%;"></div>
+    <div class="mic-bar-wrap">
+      <div class="mic-bar-label">Audio Level</div>
+      <div class="mic-bar">
+        <div class="fill" id="micBar" style="width:0%;"></div>
+      </div>
     </div>
-    <button class="btn btn-primary" id="micBtn" style="flex:0; min-width:180px;">🎤 Aktifkan Mic Laptop</button>
+    <button class="btn btn-primary" id="micBtn" style="flex:0; min-width:180px;">🎤 Aktifkan Mic</button>
   </div>
 
-  <!-- MAIN GRID -->
-  <div class="main-grid">
-    <!-- GAUGE -->
-    <div class="panel">
-      <div class="label">🎯 Skor Fokus</div>
-      <div class="focus-gauge">
-        <div class="gauge-circle" id="gaugeCircle">
-          <div class="gauge-inner">
-            <div class="gauge-score" id="gaugeScore">--</div>
-            <div class="gauge-label">/ 100</div>
+  <!-- LAYOUT UNIK: ASYMMETRIC GRID -->
+  <div class="layout">
+    
+    <!-- PANEL FOKUS (KIRI, SPAN 2 ROW) -->
+    <div class="panel-focus">
+      <!-- Gauge -->
+      <div class="glass">
+        <div class="panel-inner">
+          <div class="panel-label">
+            <span class="icon-box">🎯</span>
+            Skor Fokus Keseluruhan
+          </div>
+          <div class="focus-gauge">
+            <div class="gauge-circle" id="gaugeCircle">
+              <div class="gauge-inner">
+                <div class="gauge-score" id="gaugeScore">--</div>
+                <div class="gauge-label">DARI 100</div>
+              </div>
+            </div>
+            <div class="gauge-status" id="gaugeStatus">MENUNGGU...</div>
           </div>
         </div>
-        <div class="gauge-status" id="gaugeStatus">MENUNGGU...</div>
+      </div>
+
+      <!-- Breakdown -->
+      <div class="glass">
+        <div class="panel-inner">
+          <div class="panel-label">
+            <span class="icon-box">📊</span>
+            Breakdown Komponen
+          </div>
+          <div class="breakdown-list">
+            <div class="breakdown-item">
+              <div class="top">
+                <span class="title"><span class="icon-small">🔊</span> Kebisingan</span>
+                <span class="score" id="soundScore">--</span>
+              </div>
+              <div class="bar"><div class="fill" id="soundBar" style="width:0%;"></div></div>
+              <div class="info-text" id="soundInfo">Menunggu data...</div>
+            </div>
+            <div class="breakdown-item">
+              <div class="top">
+                <span class="title"><span class="icon-small">🌡️</span> Suhu Ruangan</span>
+                <span class="score" id="tempScore">--</span>
+              </div>
+              <div class="bar"><div class="fill" id="tempBar" style="width:0%;"></div></div>
+              <div class="info-text" id="tempInfo">Menunggu data...</div>
+            </div>
+            <div class="breakdown-item">
+              <div class="top">
+                <span class="title"><span class="icon-small">💡</span> Intensitas Cahaya</span>
+                <span class="score" id="lightScore">--</span>
+              </div>
+              <div class="bar"><div class="fill" id="lightBar" style="width:0%;"></div></div>
+              <div class="info-text" id="lightInfo">Menunggu data...</div>
+            </div>
+            <div class="breakdown-item">
+              <div class="top">
+                <span class="title"><span class="icon-small">😊</span> Postur (AI)</span>
+                <span class="score" id="faceScore">--</span>
+              </div>
+              <div class="bar"><div class="fill" id="faceBar" style="width:0%;"></div></div>
+              <div class="info-text" id="faceInfo">Menunggu data...</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- BREAKDOWN -->
-    <div class="panel">
-      <div class="label">📊 Breakdown Komponen</div>
-      <div class="breakdown-list">
-        <div class="breakdown-item">
-          <div class="top">
-            <span class="title">🔊 Kebisingan</span>
-            <span class="score" id="soundScore">--</span>
+    <!-- PANEL KAMERA (KANAN ATAS) -->
+    <div class="panel-camera">
+      <div class="glass" style="height:100%;">
+        <div class="panel-inner">
+          <div class="panel-label">
+            <span class="icon-box">📷</span>
+            Deteksi Postur AI Pose
           </div>
-          <div class="bar"><div class="fill" id="soundBar" style="width:0%;"></div></div>
-          <div style="font-size:10px;color:var(--text-muted);margin-top:6px;" id="soundInfo">Menunggu data...</div>
-        </div>
-        <div class="breakdown-item">
-          <div class="top">
-            <span class="title">🌡️ Suhu</span>
-            <span class="score" id="tempScore">--</span>
+          <div id="webcam-container">
+            <div class="placeholder">
+              🎥 Kamera belum aktif<br>
+              <span style="font-size:11px;color:var(--text-muted);">Klik "Aktifkan Kamera"</span>
+            </div>
           </div>
-          <div class="bar"><div class="fill" id="tempBar" style="width:0%;"></div></div>
-          <div style="font-size:10px;color:var(--text-muted);margin-top:6px;" id="tempInfo">Menunggu data...</div>
-        </div>
-        <div class="breakdown-item">
-          <div class="top">
-            <span class="title">💡 Cahaya</span>
-            <span class="score" id="lightScore">--</span>
+          <div class="face-detection">
+            <div class="label-face">Status Postur</div>
+            <div class="value-face" id="faceDetection">--</div>
           </div>
-          <div class="bar"><div class="fill" id="lightBar" style="width:0%;"></div></div>
-          <div style="font-size:10px;color:var(--text-muted);margin-top:6px;" id="lightInfo">Menunggu data...</div>
-        </div>
-        <div class="breakdown-item">
-          <div class="top">
-            <span class="title">😊 Postur (AI)</span>
-            <span class="score" id="faceScore">--</span>
-          </div>
-          <div class="bar"><div class="fill" id="faceBar" style="width:0%;"></div></div>
-          <div style="font-size:10px;color:var(--text-muted);margin-top:6px;" id="faceInfo">Menunggu data...</div>
+          <div class="confidence-grid" id="confidenceGrid"></div>
         </div>
       </div>
     </div>
 
-    <!-- KAMERA -->
-    <div class="panel">
-      <div class="label">📷 Deteksi Postur (AI Pose)</div>
-      <div id="webcam-container">
-        <div class="placeholder">
-          🎥 Kamera belum aktif<br>
-          <span style="font-size:11px;color:var(--text-muted);">Klik "Aktifkan Kamera"</span>
+    <!-- PANEL SENSOR (KANAN BAWAH) -->
+    <div class="panel-sensors">
+      <div class="glass" style="height:100%;">
+        <div class="panel-inner">
+          <div class="panel-label">
+            <span class="icon-box">📡</span>
+            Sensor Real-time
+          </div>
+          <div class="sensor-grid-3" style="margin-bottom: 12px;">
+            <div class="sensor-card">
+              <span class="indicator" id="indSound"></span>
+              <div class="title">🔊 KY-037</div>
+              <div class="value" id="soundValue">--</div>
+              <div class="sub" id="soundSub">ADC: --</div>
+            </div>
+            <div class="sensor-card">
+              <span class="indicator" id="indTemp"></span>
+              <div class="title">🌡️ Suhu</div>
+              <div class="value" id="tempValue">--</div>
+              <div class="sub" id="tempSub">--</div>
+            </div>
+            <div class="sensor-card">
+              <span class="indicator" id="indLight"></span>
+              <div class="title">💡 Cahaya</div>
+              <div class="value" id="lightValue">--</div>
+              <div class="sub" id="lightSub">--</div>
+            </div>
+          </div>
+          <div class="sensor-grid">
+            <div class="sensor-card">
+              <span class="indicator" id="indHum"></span>
+              <div class="title">💧 Kelembapan</div>
+              <div class="value" id="humValue">--</div>
+              <div class="sub">% RH (DHT11)</div>
+            </div>
+            <div class="sensor-card">
+              <span class="indicator" id="indBuzzer"></span>
+              <div class="title">🔔 Buzzer</div>
+              <div class="value" id="buzzerValue">--</div>
+              <div class="sub" id="buzzerSub">--</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="face-detection">
-        <div class="label-face">Status Postur</div>
-        <div class="value-face" id="faceDetection">--</div>
-      </div>
-      <div class="confidence-grid" id="confidenceGrid"></div>
-    </div>
-  </div>
-
-  <!-- SENSOR CARDS -->
-  <div class="sensor-section-title">📡 Sensor Real-time</div>
-  <div class="sensor-grid-3" style="margin-bottom: 12px;">
-    <div class="sensor-card">
-      <span class="indicator" id="indSound"></span>
-      <div class="title">🔊 KY-037</div>
-      <div class="value" id="soundValue">--</div>
-      <div class="sub" id="soundSub">ADC: --</div>
-    </div>
-    <div class="sensor-card">
-      <span class="indicator" id="indTemp"></span>
-      <div class="title">🌡️ Suhu</div>
-      <div class="value" id="tempValue">--</div>
-      <div class="sub" id="tempSub">--</div>
-    </div>
-    <div class="sensor-card">
-      <span class="indicator" id="indLight"></span>
-      <div class="title">💡 Cahaya</div>
-      <div class="value" id="lightValue">--</div>
-      <div class="sub" id="lightSub">--</div>
-    </div>
-  </div>
-
-  <div class="sensor-grid-2" style="margin-bottom: 20px;">
-    <div class="sensor-card">
-      <span class="indicator" id="indHum"></span>
-      <div class="title">💧 Kelembapan</div>
-      <div class="value" id="humValue">--</div>
-      <div class="sub">% RH (DHT11)</div>
-    </div>
-    <div class="sensor-card">
-      <span class="indicator" id="indBuzzer"></span>
-      <div class="title">🔔 Buzzer ESP32</div>
-      <div class="value" id="buzzerValue">--</div>
-      <div class="sub" id="buzzerSub">--</div>
     </div>
   </div>
 
@@ -819,41 +1179,45 @@
     <div class="desc-status" id="descStatus">Hubungkan ESP32 & aktifkan kamera</div>
   </div>
 
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button class="btn btn-primary" id="cameraBtn">📷 Aktifkan Kamera</button>
+    <button class="btn btn-success" id="connectBtn">🔌 Hubungkan ESP32</button>
+    <button class="btn btn-warning" id="muteBtn">🔕 Mute Buzzer</button>
+    <button class="btn btn-success" id="unmuteBtn">🔔 Unmute Buzzer</button>
+    <button class="btn btn-danger" id="testAlarmBtn">🚨 Test Alarm</button>
+    <button class="btn btn-warning" id="stopAlarmBtn">⏹️ Stop Alarm</button>
+  </div>
+
   <!-- QUOTE CARD -->
   <div class="quote-card">
     <div class="quote-label">💡 Kata Motivasi</div>
     <div class="quote-text" id="quoteText">Tetap fokus, kamu bisa!</div>
   </div>
 
-  <!-- CONTROLS -->
-  <div class="controls" style="margin-top: 20px;">
-    <button class="btn btn-primary" id="cameraBtn">📷 Aktifkan Kamera</button>
-    <button class="btn btn-success" id="connectBtn">🔌 Hubungkan ESP32</button>
-  </div>
-
-  <div class="controls">
-    <button class="btn btn-warning" id="muteBtn">🔕 Mute Buzzer</button>
-    <button class="btn btn-success" id="unmuteBtn">🔔 Unmute Buzzer</button>
-  </div>
-
-  <div class="controls">
-    <button class="btn btn-danger" id="testAlarmBtn">🚨 Test Alarm</button>
-    <button class="btn btn-warning" id="stopAlarmBtn">⏹️ Stop Alarm</button>
-  </div>
-
   <!-- BOTTOM GRID -->
   <div class="bottom-grid">
-    <div class="panel">
-      <div class="label">💡 Saran Perbaikan</div>
-      <div class="tips-list" id="tipsList">
-        <div class="tip-item">Menunggu data sensor untuk memberikan saran...</div>
+    <div class="glass">
+      <div class="panel-inner">
+        <div class="panel-label">
+          <span class="icon-box">💡</span>
+          Saran Perbaikan
+        </div>
+        <div class="tips-list" id="tipsList">
+          <div class="tip-item">Menunggu data sensor untuk memberikan saran...</div>
+        </div>
       </div>
     </div>
 
-    <div class="panel">
-      <div class="label">📋 Log Aktivitas</div>
-      <div class="log" id="log">
-        <span class="time">[System]</span> Siap. Hubungkan ESP32 dan aktifkan kamera.<br>
+    <div class="glass">
+      <div class="panel-inner">
+        <div class="panel-label">
+          <span class="icon-box">📋</span>
+          Log Aktivitas
+        </div>
+        <div class="log" id="log">
+          <span class="time">[System]</span> Siap. Hubungkan ESP32 dan aktifkan kamera.<br>
+        </div>
       </div>
     </div>
   </div>
@@ -866,14 +1230,11 @@
   const URL_MODEL_POSE = "https://teachablemachine.withgoogle.com/models/VRCjTDFwO-/";
   const CONFIDENCE_THRESHOLD = 0.70;
   const STABLE_FRAMES_REQUIRED = 5;
-  const BAUD_RATE = 74880;  // ★ Untuk ESP32 crystal 26MHz
+  const BAUD_RATE = 74880;
   const ALARM_SOUND_THRESHOLD = 30;
   const MIC_ALARM_THRESHOLD = 50;
   const FACE_SEND_INTERVAL = 2000;
 
-  // =========================================================
-  // QUOTES MOTIVASI
-  // =========================================================
   const QUOTES = [
     "Tetap fokus, kamu bisa!",
     "Istirahat 5 menit itu OK!",
@@ -905,7 +1266,6 @@
   let stableFrames = 0;
   let lastFaceSentTime = 0;
 
-  // Mic laptop
   let micActive = false;
   let audioContext = null;
   let analyser = null;
@@ -974,7 +1334,7 @@
     $("alarmBanner").classList.add("show");
     playNoiseAlarm();
     alarmInterval = setInterval(() => { playNoiseAlarm(); }, 3000);
-    addLog("🚨 ALARM LAPTOP: Ruangan tidak kondusif!", "err");
+    addLog("🚨 ALARM: Ruangan tidak kondusif!", "err");
   }
 
   function stopAlarm() {
@@ -982,7 +1342,7 @@
     alarmActive = false;
     $("alarmBanner").classList.remove("show");
     if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
-    addLog("✅ Alarm laptop dimatikan", "ok");
+    addLog("✅ Alarm dimatikan", "ok");
   }
 
   // =========================================================
@@ -1004,7 +1364,8 @@
 
       micActive = true;
       $("micBtn").textContent = "✅ Mic Aktif";
-      $("micIcon").classList.remove("off");
+      $("micIcon").textContent = "🎙️";
+      $("micIconWrap").classList.add("active");
       $("micPanel").classList.add("active");
       addLog("🎤 Mic laptop aktif!", "ok");
 
@@ -1012,7 +1373,7 @@
     } catch (error) {
       console.error(error);
       $("micBtn").disabled = false;
-      $("micBtn").textContent = "🎤 Aktifkan Mic Laptop";
+      $("micBtn").textContent = "🎤 Aktifkan Mic";
       addLog("Gagal akses mic: " + error.message, "err");
     }
   }
@@ -1027,7 +1388,6 @@
     for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
     const avg = sum / dataArray.length;
 
-    // Sensitivitas tinggi
     micLevel = Math.round((avg / 150) * 100);
     micLevel = Math.max(0, Math.min(100, micLevel));
     sensorData.micLevel = micLevel;
@@ -1037,7 +1397,7 @@
 
     if (micLevel > 70) $("micBar").style.background = "linear-gradient(90deg, #e53935, #c62828)";
     else if (micLevel > 40) $("micBar").style.background = "linear-gradient(90deg, #fbc02d, #f9a825)";
-    else $("micBar").style.background = "linear-gradient(90deg, var(--brown-2), var(--brown-light))";
+    else $("micBar").style.background = "linear-gradient(90deg, var(--brown-warm), var(--brown-light))";
 
     const now = Date.now();
     if (serialReady && now - lastMicSentTime > MIC_SEND_INTERVAL) {
@@ -1080,7 +1440,6 @@
     setTimeout(() => {
       currentQuoteIndex = (currentQuoteIndex + 1) % QUOTES.length;
       $("quoteText").textContent = QUOTES[currentQuoteIndex];
-      $("quoteText").style.transition = "opacity 0.5s";
       $("quoteText").style.opacity = "1";
     }, 300);
   }
@@ -1101,8 +1460,9 @@
 
     const degrees = (score / 100) * 360;
     $("gaugeCircle").style.background =
-      `conic-gradient(${gaugeColor} 0deg, ${gaugeColor} ${degrees}deg, rgba(212,165,116,0.08) ${degrees}deg)`;
+      `conic-gradient(${gaugeColor} 0deg, ${gaugeColor} ${degrees}deg, rgba(212,165,116,0.06) ${degrees}deg)`;
     $("gaugeScore").style.color = gaugeColor;
+    $("gaugeStatus").style.color = gaugeColor;
 
     updateBar("sound", sensorData.soundScore, 
       `${sensorData.soundStatus} (KY: ${sensorData.soundADC} | Mic: ${sensorData.micLevel}%)`);
@@ -1126,7 +1486,7 @@
     setIndicator("indHum", 70);
 
     $("buzzerValue").textContent = sensorData.buzzer;
-    $("buzzerSub").textContent = sensorData.muted === 1 ? "🔕 MUTED (manual)" : "Auto mode";
+    $("buzzerSub").textContent = sensorData.muted === 1 ? "🔕 MUTED" : "Auto mode";
     if (sensorData.muted === 1) $("indBuzzer").className = "indicator warn";
     else if (sensorData.buzzer === "ON") $("indBuzzer").className = "indicator danger";
     else $("indBuzzer").className = "indicator on";
@@ -1159,7 +1519,7 @@
     else if (score < 80) color = "var(--brown-light)";
 
     bar.style.width = score + "%";
-    bar.style.background = color;
+    bar.style.background = `linear-gradient(90deg, ${color}, ${color}dd)`;
     scoreEl.style.color = color;
   }
 
@@ -1491,9 +1851,8 @@
   // INIT
   // =========================================================
   addLog("☕ FocusMate AI siap.", "info");
-  addLog("Model Pose: " + URL_MODEL_POSE.substring(0, 50) + "...", "info");
-  addLog("Kelas: FOKUS, MENGANTUK, DISTRAKSI, TIDAK_ADA_ORANG", "info");
-  addLog("Audio: KY-037 + Mic Laptop (fusion)", "info");
+  addLog("Model Pose: 4 kelas", "info");
+  addLog("Audio: KY-037 + Mic Laptop", "info");
   setStatus("Menunggu koneksi", "gray");
 </script>
 </body>
